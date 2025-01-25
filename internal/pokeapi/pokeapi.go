@@ -25,29 +25,37 @@ func (c *Client) LoadLocationAreas(pageUrl *string) (LocationAreaResponse, error
 		url = *pageUrl
 	}
 
-	req, err := http.NewRequest("GET", url, nil)
+	_, ok := c.cache.Get(url)
 
-	if err != nil {
-		return LocationAreaResponse{}, err
+	if !ok {
+		req, err := http.NewRequest("GET", url, nil)
+
+		if err != nil {
+			return LocationAreaResponse{}, err
+		}
+
+		res, err := c.httpClient.Do(req)
+
+		if err != nil {
+			return LocationAreaResponse{}, err
+		}
+
+		defer res.Body.Close()
+
+		rawData, err := io.ReadAll(res.Body)
+
+		if err != nil {
+			return LocationAreaResponse{}, err
+		}
+
+		c.cache.Add(url, rawData)
 	}
 
-	res, err := c.httpClient.Do(req)
-
-	if err != nil {
-		return LocationAreaResponse{}, err
-	}
-
-	defer res.Body.Close()
-
-	rawData, err := io.ReadAll(res.Body)
-
-	if err != nil {
-		return LocationAreaResponse{}, err
-	}
+	cachedData, _ := c.cache.Get(url)
 
 	var locationAreaRes LocationAreaResponse
 
-	if err := json.Unmarshal(rawData, &locationAreaRes); err != nil {
+	if err := json.Unmarshal(cachedData, &locationAreaRes); err != nil {
 		return LocationAreaResponse{}, err
 	}
 
