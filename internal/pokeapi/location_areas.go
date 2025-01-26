@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (c *Client) LoadLocationAreas(pageUrl *string) (ShallowLocationAreasResponse, error) {
+func (c *Client) GetLocationAreas(pageUrl *string) (ShallowLocationAreasResponse, error) {
 	url := baseUrl + "/location-area"
 
 	if pageUrl != nil {
@@ -50,7 +50,7 @@ func (c *Client) LoadLocationAreas(pageUrl *string) (ShallowLocationAreasRespons
 	return locationAreasRes, nil
 }
 
-func (c *Client) LoadLocationAreaByName(name string) (LocationAreaResponse, error) {
+func (c *Client) GetLocationAreaByName(name string) (LocationAreaResponse, error) {
 	url := baseUrl + "/location-area/" + name
 
 	_, ok := c.cache.Get(url)
